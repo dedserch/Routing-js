@@ -10,65 +10,64 @@ class Api {
 
 class Router {
     constructor() {
-        this.routes = {};
-        this.currentRoute = '';
-        this.container = document.getElementById('app');
-        window.addEventListener('hashchange', this.handleRouteChange.bind(this));
-        window.addEventListener('load', this.handleRouteChange.bind(this));
+        this.routes = {}
+        this.currentRoute = ''
+        this.container = document.getElementById('app')
+        window.addEventListener('hashchange', this.handleRouteChange.bind(this))
+        window.addEventListener('load', this.handleRouteChange.bind(this))
     }
 
     async handleRouteChange() {
-        const path = window.location.hash.slice(1);
-        console.log('Текущий маршрут:', path);
+        const path = window.location.hash.slice(1)
         if (path === '') {
-            this.navigateTo('home');
-            return;
+            this.navigateTo('home')
+            return
         }
-        this.currentRoute = path;
-        this.container.innerHTML = '';
+        this.currentRoute = path
+        this.container.innerHTML = ''
 
         let matchedRoute = Object.keys(this.routes).find(route => {
-            const routeParts = route.split('/');
-            const pathParts = path.split('/');
-            if (routeParts.length !== pathParts.length) return false;
+            const routeParts = route.split('/')
+            const pathParts = path.split('/')
+            if (routeParts.length !== pathParts.length) return false
             for (let i = 0; i < routeParts.length; i++) {
                 if (routeParts[i] !== pathParts[i] && !routeParts[i].startsWith(':')) {
-                    return false;
+                    return false
                 }
             }
-            return true;
-        });
+            return true
+        })
 
         if (!matchedRoute) {
-            this.displayErrorPage();
-            return;
+            this.displayErrorPage()
+            return
         }
 
-        const routeHandler = this.routes[matchedRoute];
+        const routeHandler = this.routes[matchedRoute]
         if (routeHandler) {
             try {
-                await routeHandler();
+                await routeHandler()
             } catch (error) {
-                console.error(error);
-                this.displayErrorPage();
+                console.error(error)
+                this.displayErrorPage()
             }
         } else {
-            this.displayErrorPage();
+            this.displayErrorPage()
         }
     }
 
     navigateTo(path) {
-        window.location.hash = path;
+        window.location.hash = path
     }
 
     displayErrorPage() {
-        const errorPage = document.createElement('div');
-        errorPage.textContent = 'Страница не найдена';
-        this.container.appendChild(errorPage);
+        const errorPage = document.createElement('div')
+        errorPage.textContent = 'Страница не найдена'
+        this.container.appendChild(errorPage)
     }
 
     registerRoute(path, handler) {
-        this.routes[path] = handler;
+        this.routes[path] = handler
     }
 }
 
@@ -109,30 +108,61 @@ function renderHomePage() {
 }
 
 function renderUserList(users) {
-    const userList = document.createElement('ul')
+    const userListContainer = document.createElement('div')
+    userListContainer.classList.add('user-list')
+
     users.forEach(user => {
-        const userItem = document.createElement('li')
-        userItem.textContent = user.name
-        userItem.addEventListener('click', () => {
+        const userCard = document.createElement('div')
+        userCard.classList.add('user-card')
+
+        const gridContainer = document.createElement('div')
+        gridContainer.classList.add('grid-container')
+
+        const labels = ['Настоящее имя:', 'Никнейм:', 'Email:']
+        const values = [user.name, user.username, user.email]
+
+        labels.forEach((label, index) => {
+            const labelElement = document.createElement('div')
+            labelElement.textContent = label
+            labelElement.classList.add('label')
+            gridContainer.appendChild(labelElement)
+
+            const valueElement = document.createElement('div')
+            valueElement.textContent = values[index]
+            valueElement.classList.add('value')
+            gridContainer.appendChild(valueElement)
+        })
+
+        userCard.appendChild(gridContainer)
+        userListContainer.appendChild(userCard)
+
+        userCard.addEventListener('click', () => {
             window.location.hash = `users/${user.id}`
         })
-        userList.appendChild(userItem)
     })
-    document.getElementById('app').appendChild(userList)
+
+    document.getElementById('app').appendChild(userListContainer)
 }
 
 function renderAlbumList(albums) {
-    const albumList = document.createElement('ul')
+    const albumListContainer = document.createElement('div')
+    albumListContainer.classList.add('album-list')
+
     albums.forEach(album => {
-        const albumItem = document.createElement('li')
-        albumItem.textContent = album.title
-        albumItem.addEventListener('click', () => {
+        const albumCard = document.createElement('div')
+        albumCard.classList.add('album-card')
+        albumCard.textContent = album.title
+
+        albumCard.addEventListener('click', () => {
             window.location.hash = `users/${album.userId}/albums/${album.id}`
         })
-        albumList.appendChild(albumItem)
+
+        albumListContainer.appendChild(albumCard)
     })
-    document.getElementById('app').appendChild(albumList)
+
+    document.getElementById('app').appendChild(albumListContainer)
 }
+
 
 function renderPhotoList(photos) {
     const photoList = document.createElement('ul')
